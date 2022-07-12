@@ -1,6 +1,6 @@
-(ns server.core
+(ns server.http.core
   (:require [ring.adapter.jetty :as jetty]
-            [server.router :refer (router)]))
+            [server.http.router :refer (router)]))
 
 (defn -main [& _]
   (let [host "localhost"

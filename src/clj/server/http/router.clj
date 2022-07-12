@@ -1,8 +1,8 @@
-(ns server.router
+(ns server.http.router
   (:require [compojure.core :refer :all]
             [compojure.route :as route]
             ;[compojure.coercions :refer (as-int)]
-            [server.pages :as pages]))
+            [server.http.pages :as pages]))
 
 
 (defroutes router
