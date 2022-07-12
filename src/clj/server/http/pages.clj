@@ -1,4 +1,4 @@
-(ns server.pages
+(ns server.http.pages
   (:require [ring.util.response :refer (resource-response)]
             [hiccup.core :as hiccup]))
 
