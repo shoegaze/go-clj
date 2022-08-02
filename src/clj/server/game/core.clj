@@ -2,12 +2,12 @@
 
 
 (defprotocol IGame
-  (get-turn [this])
+  (get-team [this])
   (ended? [this]))
 
 (defrecord Game [history]
   IGame
-  (get-turn [this]
+  (get-team [this]
     (let [history (:history this)
           turns   (count history)
           parity  (mod turns 2)]
