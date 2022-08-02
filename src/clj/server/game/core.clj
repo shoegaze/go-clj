@@ -3,7 +3,8 @@
 
 (defprotocol IGame
   (get-team [this])
-  (ended? [this]))
+  (ended? [this])
+  (place [this [x y]]))
 
 (defrecord Game [history]
   IGame
@@ -20,4 +21,6 @@
       (if (< turns 2)
         false
         (let [[left right] (take-last 2 history)]
-          (= left right))))))
+          (= left right)))))
+  (place [this [x y]]
+    :TODO))
