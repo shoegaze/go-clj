@@ -7,26 +7,26 @@
        (vec)))
 
 (defn new-matrix
-  ([w h default]
+  ([[w h] default]
    (->> (repeat (new-row w default))
         (take h)
         (vec)))
-  ([w h]
-   (new-matrix w h nil)))
+  ([dim]
+   (new-matrix dim nil)))
 
 (defn get-elem
-  ([mat x y default]
+  ([mat [x y] default]
    (get-in mat [y x] default))
-  ([mat x y]
-   (get-elem mat x y nil)))
+  ([mat coord]
+   (get-elem mat coord nil)))
 
-(defn set-elem [mat x y value]
+(defn set-elem [mat [x y] value]
   (assoc-in mat [y x] value))
 
-(defn update-elem [mat x y update-fn]
+(defn update-elem [mat [x y] update-fn]
   (let [old-value (get-elem mat x y)
         new-value (update-fn old-value)]
-    (set-elem mat x y new-value)))
+    (set-elem mat [x y] new-value)))
 
 (defn get-dim [mat]
   (let [h (count mat)]
@@ -54,30 +54,32 @@
         gs  (group-by group-fn col)]
     (count (gs group))))
 
-(defn get-neighbors [mat x y default]
-  [(get-elem mat (+ x 1) y       default)
-   (get-elem mat (- x 1) y       default)
-   (get-elem mat x       (+ y 1) default)
-   (get-elem mat x       (- y 1) default)])
+(defn get-neighbors
+  ([mat [x y] default]
+   [(get-elem mat [(+ x 1) y      ] default)
+    (get-elem mat [(- x 1) y      ] default)
+    (get-elem mat [x       (+ y 1)] default)
+    (get-elem mat [x       (- y 1)] default)])
+  ([mat coord]
+   (get-neighbors mat coord nil)))
 
 (defn get-chunk
-  ([mat [x y] [w h] default]
-   (->> (new-matrix w h default)
+  ([mat [x y] dim default]
+   (->> (new-matrix dim default)
         (map-indexed
           (fn [y-local row]
             (->> row
                  (map-indexed
                    (fn [x-local _]
-                     (let [y' (+ y y-local)
-                           x' (+ x x-local)
-                           new-value (get-elem mat x' y' default)]
+                     (let [coord' [(+ x x-local) (+ y y-local)]
+                           new-value (get-elem mat coord' default)]
                        new-value)))
                  (vec))))
         (vec)))
-  ([mat [x y] [w h]]
-   (get-chunk mat [x y] [w h] nil)))
+  ([mat coord dim]
+   (get-chunk mat coord dim nil)))
 
-(defn set-chunk [mat x y chk]
+(defn set-chunk [mat [x y] chk]
   (let [mat' (atom mat)
         [w-chk h-chk] (get-dim chk)]
     (doseq [y-chk (range h-chk)
@@ -103,9 +105,9 @@
 (defn has-elem? [mat value]
   (> (count-elem mat value) 0))
 
-(defn has-pattern? [mat x y pattern]
+(defn has-pattern? [mat coord pattern]
   (let [dim   (get-dim pattern)
-        chunk (get-chunk mat [x y] dim nil)]
+        chunk (get-chunk mat coord dim nil)]
     (= pattern chunk)))
 
 (defn to-coords [mat]
