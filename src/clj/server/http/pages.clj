@@ -4,7 +4,7 @@
 
 
 (defn html-index []
-  (resource-response "index.html" {:root "public"}))
+  (resource-response "index.dev.html" {:root "public"}))
 
 (defn html-404 []
   (hiccup/html [:h1 "404: Page Not Found"]))
