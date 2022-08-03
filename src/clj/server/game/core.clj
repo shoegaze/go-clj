@@ -11,7 +11,6 @@
   (condp = team
     :black :white
     :white :black
-    :gray  :gray
     nil))
 
 (defn- can-place? [mat [x y] team]
@@ -25,8 +24,8 @@
   IGame
   (get-team [this]
     (let [history (:history this)
-          turns   (count history)
-          parity  (mod turns 2)]
+          turns  (count history)
+          parity (mod turns 2)]
       (condp = parity
         0 :black
         1 :white)))
@@ -40,10 +39,9 @@
           (= left right)))))
 
   (place [this coord]
-    (let [history (:history this)
-          dim     (:dim this)
+    (let [{history :history, dim :dim} this
           top   (or (take-last 1 history)
-                   (mat/new-matrix dim))
+                    (mat/new-matrix dim))
           team' (next-team (get-team this))]
       (when (can-place? top coord team')
         (mat/set-elem top coord team')))))
