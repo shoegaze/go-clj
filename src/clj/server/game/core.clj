@@ -1,12 +1,27 @@
-(ns server.game.core)
+(ns server.game.core
+  (:require [server.game.matrix :as mat]))
 
 
 (defprotocol IGame
   (get-team [this])
   (ended? [this])
-  (place [this [x y]]))
+  (place [this coord]))
 
-(defrecord Game [history]
+(defn- next-team [team]
+  (condp = team
+    :black :white
+    :white :black
+    :gray  :gray
+    nil))
+
+(defn- can-place? [mat [x y] team]
+  ; 1. elem_xy = :empty
+  ; 2.1 Do captures
+  ; 2.2.1 if (not (suicide? mat [x y] team)) ...
+  ; 2.2.2 Recursive search from [x y], search for :empty
+  )
+
+(defrecord Game [dim history]
   IGame
   (get-team [this]
     (let [history (:history this)
@@ -15,6 +30,7 @@
       (condp = parity
         0 :black
         1 :white)))
+
   (ended? [this]
     (let [history (:history this)
           turns   (count history)]
@@ -22,5 +38,12 @@
         false
         (let [[left right] (take-last 2 history)]
           (= left right)))))
-  (place [this [x y]]
-    :TODO))
+
+  (place [this coord]
+    (let [history (:history this)
+          dim     (:dim this)
+          top   (or (take-last 1 history)
+                   (mat/new-matrix dim))
+          team' (next-team (get-team this))]
+      (when (can-place? top coord team')
+        (mat/set-elem top coord team')))))
