@@ -39,12 +39,16 @@
 
   :clean-targets ^{:protect false} [:target-path "resources/public/js/bundle/"]
 
-  :aliases {"serve" ["run" "-m" "server.core"]
+  :aliases {"serve" ["run" "-m" "server.http.core"]
             "serve-repl" ["trampoline" "cljsbuild" "repl-listen"]
             "client-rebuild-all" ["do" "clean,"
                                   "cljsbuild" "once"]
+            "client-watch-all" ["cljsbuild" "auto"]
             "client-build-dev" ["cljsbuild" "once" "dev"]
+            "client-watch-dev" ["cljsbuild" "auto" "dev"]
             "client-build-pre" ["cljsbuild" "once" "pre"]
-            "client-build-prod" ["cljsbuild" "once" "prod"]}
+            "client-watch-pre" ["cljsbuild" "auto" "pre"]
+            "client-build-prod" ["cljsbuild" "once" "prod"]
+            "client-watch-prod" ["cljsbuild" "auto" "prod"]}
 
   :repl-options {:init-ns server.core})
