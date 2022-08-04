@@ -1,9 +1,9 @@
 (ns game.core
-  (:require [server.game.matrix :as mat]))
+  (:require [game.matrix :as mat]))
 
 
 (defn- next-team [team]
-  (condp = team
+  (case team
     :black :white
     :white :black))
 
@@ -41,7 +41,7 @@
     (let [history (:history this)
           turns  (count history)
           parity (mod turns 2)]
-      (condp = parity
+      (case parity
         0 :black
         1 :white)))
 
