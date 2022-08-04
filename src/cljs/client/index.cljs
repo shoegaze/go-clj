@@ -1,5 +1,9 @@
-(ns client.index)
+(ns client.index
+  (:require [reagent.dom :as rdom]
+            [domina :refer (by-id)]
+            [client.grid :refer (grid-component)]))
 
 
 (defn ^:export init []
-  (js/alert "Hello, world!"))
+  (rdom/render [grid-component]
+               (by-id "container")))
