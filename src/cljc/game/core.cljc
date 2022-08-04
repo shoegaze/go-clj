@@ -1,4 +1,4 @@
-(ns server.game.core
+(ns game.core
   (:require [server.game.matrix :as mat]))
 
 

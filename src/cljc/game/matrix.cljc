@@ -1,4 +1,4 @@
-(ns server.game.matrix)
+(ns game.matrix)
 
 
 (defn- new-row [w default]
