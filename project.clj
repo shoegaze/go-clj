@@ -4,9 +4,9 @@
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
             :url "https://www.eclipse.org/legal/epl-2.0/"}
 
-  :source-paths ["src/cljc"
-                 "src/clj"
-                 "src/cljs"]
+  :source-paths ["src/clj"
+                 "src/cljs"
+                 "src/cljc"]
 
   :dependencies [[org.clojure/clojure "1.11.1"]
                  [org.clojure/clojurescript "1.11.57"]
@@ -25,8 +25,10 @@
               {:dev
                {:source-paths ["src/cljs"]
                 :compiler {:output-to "resources/public/js/bundle/bundle.dev.js"
+                           :output-dir "resources/public/js/bundle"
                            :optimizations :whitespace
-                           :pretty-print true}}
+                           :pretty-print true
+                           :source-map "resources/public/js/bundle/bundle.dev.js.map"}}
                :pre
                {:source-paths ["src/cljs"]
                 :compiler {:output-to "resources/public/js/bundle/bundle.pre.js"
