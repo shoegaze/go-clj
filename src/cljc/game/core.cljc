@@ -2,7 +2,7 @@
   (:require [game.matrix :as mat]))
 
 
-(defn- next-team [team]
+(defn next-team [team]
   (case team
     :black :white
     :white :black))
@@ -31,32 +31,40 @@
 
 
 (defprotocol IGame
+  (get-top [this])
   (get-team [this])
+  (get-stone [this coord])
   (ended? [this])
   (place [this coord]))
 
 (defrecord Game [dim history]
   IGame
+  (get-top [this]
+    (or (peek history)
+        (mat/new-matrix dim :empty)))
+
   (get-team [this]
     (let [history (:history this)
-          turns  (count history)
-          parity (mod turns 2)]
-      (case parity
-        0 :black
-        1 :white)))
+          turns   (count history)]
+      (if (even? turns)
+        :black
+        :white)))
+
+  (get-stone [this coord]
+    (println "stone:" (mat/get-elem (get-top this) coord :gray))
+    (mat/get-elem (get-top this) coord :gray))
 
   (ended? [this]
     (let [history (:history this)
           turns   (count history)]
       (if (< turns 2)
         false
-        (let [[left right] (take-last 2 history)]
-          (= left right)))))
+        (let [[bottom top] (take-last 2 history)]
+          (= bottom top)))))
 
   (place [this coord]
     (let [{history :history, dim :dim} this
-          top   (or (take-last 1 history)
-                    (mat/new-matrix dim :empty))
+          top   (get-top this)
           team' (next-team (get-team this))]
       (when (can-place? top coord team')
         (mat/set-elem top coord team')))))
