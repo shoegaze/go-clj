@@ -1,7 +1,29 @@
-(ns client.cell)
+(ns client.cell
+  (:require [game.core :refer (->Game, get-stone, get-top, next-team)]
+            [game.matrix :as mat]))
 
 
-(defn- cell-img-class [[w h] [x y]]
+(defn- cell-fg-img-class [game _team coord]
+  (let [stone (get-stone game coord)]
+    (case stone
+      :black ["stone" "black"]
+      :white ["stone" "white"]
+      :gray  ["stone" "error"]
+      :empty ["stone"])))
+
+(defn- place [game team coord]
+  (let [{dim :dim, history :history} game
+        top  (get-top game)
+        top' (mat/set-elem top coord team)]
+    (->Game dim (conj history top'))))
+
+(defn- cell-fg-img [game team coord]
+  (let [class (cell-fg-img-class @game @team coord)]
+    [:img.cell-fg {:class class
+                   :on-click #(do (swap! game place @team coord)
+                                  (swap! team next-team))}]))
+
+(defn- cell-bg-img-class [[w h] [x y]]
   (let [left?   (= x 0)
         right?  (= x (- w 1))
         top?    (= y 0)
@@ -22,11 +44,12 @@
      (when edge?   "edge")
      (when inner?  "inner")]))
 
-(defn- cell-img [game coord]
+(defn- cell-bg-img [game _team coord]
   (let [dim   (:dim @game)
-        class (cell-img-class dim coord)]
-    [:img {:class class}]))
+        class (cell-bg-img-class dim coord)]
+    [:img.cell-bg {:class class}]))
 
-(defn cell-component [game coord]
+(defn cell-component [game team coord]
   [:span.cell
-   [cell-img game coord]])
+   [cell-fg-img game team coord]
+   [cell-bg-img game team coord]])

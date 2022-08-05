@@ -5,9 +5,10 @@
 
 
 (defonce game (r/atom (->Game [9 9] [])))
+(defonce team (r/atom :black))
 
 (defn grid-component []
   [:div.grid
    (let [[_ h] (:dim @game)]
      (for [y (range h)]
-       ^{:key y} [row-component game y]))])
+       ^{:key y} [row-component game team y]))])
