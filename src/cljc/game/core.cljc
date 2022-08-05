@@ -51,7 +51,6 @@
         :white)))
 
   (get-stone [this coord]
-    (println "stone:" (mat/get-elem (get-top this) coord :gray))
     (mat/get-elem (get-top this) coord :gray))
 
   (ended? [this]
