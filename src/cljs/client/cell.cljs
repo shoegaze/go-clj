@@ -1,5 +1,5 @@
 (ns client.cell
-  (:require [game.core :refer (->Game, get-stone, get-top, next-team)]
+  (:require [game.core :refer (->Game, get-stone, place, next-team)]
             [game.matrix :as mat]))
 
 
@@ -9,18 +9,12 @@
       :black ["stone" "black"]
       :white ["stone" "white"]
       :gray  ["stone" "error"]
-      :empty ["stone"])))
-
-(defn- place [game team coord]
-  (let [{dim :dim, history :history} game
-        top  (get-top game)
-        top' (mat/set-elem top coord team)]
-    (->Game dim (conj history top'))))
+      :empty ["stone" "empty"])))
 
 (defn- cell-fg-img [game team coord]
   (let [class (cell-fg-img-class @game @team coord)]
     [:img.cell-fg {:class class
-                   :on-click #(do (swap! game place @team coord)
+                   :on-click #(do (swap! game place coord)
                                   (swap! team next-team))}]))
 
 (defn- cell-bg-img-class [[w h] [x y]]

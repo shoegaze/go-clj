@@ -7,6 +7,10 @@
     :black :white
     :white :black))
 
+(defn- coords-bounded? [[x y] [w h]]
+  (and (< -1 x w)
+       (< -1 y h)))
+
 (defn- suicide? [mat coord team]
   :TODO)
 
@@ -16,25 +20,13 @@
   [mat coord team]
   :TODO)
 
-(defn- can-place? [mat coord team]
-  "Conditions for placement:
-  1. elem_xy = :empty
-  2.1.1 if (not (suicide? mat [x y] team)) ...
-  2.1.2 recursive search from [x y], search for :empty
-  2.2 Do captures"
-  (let [elem (mat/get-elem mat coord)]
-    (if (or (not= elem :empty)
-            (suicide? mat coord team))
-      false
-      (let [team' (next-team team)]
-        (do-captures mat coord team')))))
-
 
 (defprotocol IGame
   (get-top [this])
   (get-team [this])
   (get-stone [this coord])
   (ended? [this])
+  (can-place? [this coord])
   (place [this coord]))
 
 (defrecord Game [dim history]
@@ -61,9 +53,28 @@
         (let [[bottom top] (take-last 2 history)]
           (= bottom top)))))
 
+  ; Conditions for placement:
+  ;  1. (x,y) :: (w,0] x [0,h)
+  ;  2. elem_xy = :empty
+  ;  3.1.1 if (not (suicide? mat [x y] team)) ...
+  ;  3.1.2 recursive search from [x y], search for :empty
+  ;  3.2 Do captures
+  (can-place? [this coord]
+    (let [{dim :dim} this
+          top  (get-top this)
+          team (get-team this)]
+      (and (coords-bounded? coord dim)
+           (= (get-stone this coord) :empty)
+           ;(if (not (suicide? top [x y] team))
+           ;  then
+           ;  else)
+           )))
+
   (place [this coord]
     (let [{history :history, dim :dim} this
-          top   (get-top this)
-          team' (next-team (get-team this))]
-      (when (can-place? top coord team')
-        (mat/set-elem top coord team')))))
+          top  (get-top this)
+          team (get-team this)]
+      (when (can-place? this coord)
+        (let [board'   (mat/set-elem top coord team)
+              history' (conj history board')]
+          (->Game dim history'))))))
