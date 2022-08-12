@@ -119,3 +119,32 @@
                   (fn [x _] [x y]))
                 (into []))))
        (into [])))
+
+(defn get-neighbors* [mat coord]
+  (let [neighbors  (get-neighbors mat coord)
+        mat*       (to-coords mat)
+        neighbors* (get-neighbors mat* coord)]
+    (->> (mapv #(vector %1 %2) neighbors neighbors*)
+         (filter #(not= % [nil nil]))
+         (vec))))
+
+(defn connections*
+  ([mat coord path]
+   (let [elem (get-elem mat coord)
+         neighbors* (->> coord
+                         (get-neighbors* mat)
+                         (filter (fn [[elem* _]] (= elem* elem)))
+                         (remove (fn [[_ coord*]] (some? (path coord*)))))
+         path' (reduce (fn [path* [_ coord*]]
+                         (conj path* coord*))
+                       path
+                       neighbors*)]
+     (if (empty? neighbors*)
+       path'
+       (reduce
+         (fn [path* [_ coord*]]
+           (clojure.set/union path* (connections* mat coord* path*)))
+         path'
+         neighbors*))))
+  ([mat coord]
+   (connections* mat coord #{})))
