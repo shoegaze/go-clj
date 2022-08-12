@@ -135,9 +135,10 @@
                          (get-neighbors* mat)
                          (filter (fn [[elem* _]] (= elem* elem)))
                          (remove (fn [[_ coord*]] (some? (path coord*)))))
+         path' (conj path coord)
          path' (reduce (fn [path* [_ coord*]]
                          (conj path* coord*))
-                       path
+                       path'
                        neighbors*)]
      (if (empty? neighbors*)
        path'
