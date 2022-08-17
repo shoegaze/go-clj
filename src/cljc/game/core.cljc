@@ -1,5 +1,5 @@
 (ns game.core
-  (:require [game.matrix :as mat]))
+  (:require [game.matrix :as M]))
 
 
 (defn next-team [team]
@@ -7,16 +7,16 @@
     :black :white
     :white :black))
 
-(defn- in-bounds? [[x y] [w h]]
+(defn- in-bounds? [[w h] [x y]]
   (and (< -1 x w)
        (< -1 y h)))
 
 (defn- occupied? [board coord]
-  (not= (mat/get-elem board coord) :empty))
+  (not= (M/get-elem board coord) :empty))
 
 (defn surrounded? [board coord]
-  (let [team       (mat/get-elem board coord)
-        neighbors* (mat/get-neighbors* board coord)]
+  (let [team       (M/get-elem board coord)
+        neighbors* (M/get-neighbors* board coord)]
     (if (= team :empty)
       false
       (reduce
@@ -32,12 +32,12 @@
   If team is :black and their stones are surrounded, return new matrix with those :black stones removed."
   [board coord team]
   (let [board'  (atom board)
-        targets (->> (mat/get-neighbors* board coord)
+        targets (->> (M/get-neighbors* board coord)
                      (remove (fn [[t _]] (= t team)))
                      (filter (fn [[_ c]] (surrounded? board c))))
         paths   (->> targets
                      (map (fn [[_ c]] c))
-                     (map (fn [[_ c]] (mat/connections* board c)))
+                     (map (fn [c] (M/connections* board c)))
                      (distinct))]
 
     ;(println "targets*" (->> (mat/get-neighbors* board coord)))
@@ -49,7 +49,7 @@
         (println "coord*" coord*)
         (println "team" team)
 
-        (swap! board' mat/set-elem coord* team)))
+        (swap! board' M/set-elem coord* team)))
     @board'))
 
 
@@ -66,7 +66,7 @@
   IGame
   (get-top [this]
     (or (peek history)
-        (mat/new-matrix dim :empty)))
+        (M/new-matrix dim :empty)))
 
   (get-team [this]
     (let [turns (count history)]
@@ -75,7 +75,7 @@
         :white)))
 
   (get-stone [this coord]
-    (mat/get-elem (get-top this) coord :gray))
+    (M/get-elem (get-top this) coord :gray))
 
   (ended? [this]
     (let [turns (count history)]
@@ -85,21 +85,23 @@
           (= bottom middle top)))))
 
   ; Conditions for placement:
-  ;  1. elem_xy = :empty
-  ;  2.1.1 if-not (suicide? mat [x y] team) ...
-  ;  2.1.2 recursive search from [x y], search for :empty
-  ;  2.2.1 Do captures as mat'
-  ;  2.2.2 if-not (= mat' mat) ...
-  ;  2.2.2.1 then mat'
-  ;  2.2.2.2 else mat
+  ; 1. coord :: [0, h) X (w, 0]
+  ; 2. elem_xy = :empty
+  ; 3.1. Place stone s_xy
+  ; 3.2. not surrounded? s_xy
+  ; 3.3.1. Do captures for current team
+  ; 3.3.2. Apply Ko rule
   (can-place? [this coord]
-    (let [top  (get-top this)]
-      (and (in-bounds? coord dim)
+    (let [dim (:dim this)
+          top (get-top this)]
+      (and (in-bounds? dim coord)
            (not (occupied? top coord))
            (let [team (get-team this)
-                 top' (mat/set-elem top coord team)
-                 top' (do-captures top' coord team)]
-             (not= top' top)))))
+                 top' (M/set-elem top coord team)]
+             (if (surrounded? top' coord)
+               false
+               (let [top' (do-captures top' coord team)]
+                 (not= top' top)))))))
 
   (place [this coord]
     (when (can-place? this coord)
@@ -108,7 +110,7 @@
 
       (let [team (get-team this)
             top  (get-top this)
-            top' (mat/set-elem top coord team)
+            top' (M/set-elem top coord team)
             top' (do-captures top' coord team)]
 
         (println "top" top)

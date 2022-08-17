@@ -2,6 +2,13 @@
   (:require [game.core :refer (->Game, get-stone, get-top, next-team, place)]))
 
 
+(defn cell-fg-on-click [game coord team]
+  (if-let [game' (place game coord)]
+    (do
+      (reset! game game')
+      (swap! team next-team))
+    game))
+
 (defn- cell-fg-img-class [game _team coord]
   (let [stone (get-stone game coord)]
     (case stone
@@ -13,8 +20,9 @@
 (defn- cell-fg-img [game team coord]
   (let [class (cell-fg-img-class @game @team coord)]
     [:img.cell-fg {:class class
-                   :on-click #(do (swap! game place coord)
-                                  (swap! team next-team))}]))
+                   :on-click #(when-let [game' (place game coord)]
+                                (reset! game game')
+                                (swap! team next-team))}]))
 
 (defn- cell-bg-img-class [[w h] [x y]]
   (let [left?   (= x 0)
