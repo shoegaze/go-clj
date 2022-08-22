@@ -14,25 +14,33 @@
 (defn- occupied? [board coord]
   (not= (M/get-elem board coord) :empty))
 
-(defn surrounded? [board coord]
+(defn- surrounded?-inner [board coord]
   (let [team       (M/get-elem board coord)
         neighbors* (M/get-neighbors* board coord)]
+    (reduce
+      (fn [acc [t c]]
+        (println " * acc" acc)
+        (println " * t" t)
+        (println " * c" c)
+
+        (condp = t
+          :empty (reduced false)
+          team   (surrounded?-inner board c)
+          true))
+      neighbors*)))
+
+(defn surrounded? [board coord]
+  (let [team (M/get-elem board coord)]
     (if (= team :empty)
       false
-      (reduce
-        (fn [_ [t c]]
-          (condp = t
-            :empty (reduced false)
-            team   (surrounded? board c)
-            true))
-        neighbors*))))
+      (surrounded?-inner board coord))))
 
 (defn- do-captures
   "Do captures on the given team's stones.
   If team is :black and their stones are surrounded, return new matrix with those :black stones removed."
   [board coord team]
   (let [board'  (atom board)
-        targets (->> (M/get-neighbors* board coord)
+        targets (->> (M/get-neighbors* board coord)         ; TODO: get all neighbors of coord's connected path
                      (remove (fn [[t _]] (= t team)))
                      (filter (fn [[_ c]] (surrounded? board c))))
         paths   (->> targets
@@ -40,16 +48,20 @@
                      (map (fn [c] (M/connections* board c)))
                      (distinct))]
 
-    ;(println "targets*" (->> (mat/get-neighbors* board coord)))
-    (println "targets" targets)
-    (println "paths" paths)
+    (println " targets*" (->> (M/get-neighbors* board coord)))
+    (println " targets" targets)
+    (println " paths" paths)
 
     (doseq [path paths]
-      (doseq [coord* path]
-        (println "coord*" coord*)
-        (println "team" team)
+      (do
+        (println "  path" path)
 
-        (swap! board' M/set-elem coord* team)))
+        (doseq [coord* path]
+          (do
+            (println "   coord*" coord*)
+            (println "   team" team)
+
+            (swap! board' M/set-elem coord* :empty)))))
     @board'))
 
 
@@ -84,24 +96,18 @@
         (let [[bottom middle top] (take-last 3 history)]
           (= bottom middle top)))))
 
-  ; Conditions for placement:
-  ; 1. coord :: [0, h) X (w, 0]
-  ; 2. elem_xy = :empty
-  ; 3.1. Place stone s_xy
-  ; 3.2. not surrounded? s_xy
-  ; 3.3.1. Do captures for current team
-  ; 3.3.2. Apply Ko rule
   (can-place? [this coord]
-    (let [dim (:dim this)
-          top (get-top this)]
+    (let [{dim :dim} this
+          team (get-team this)]
       (and (in-bounds? dim coord)
-           (not (occupied? top coord))
-           (let [team (get-team this)
+           (let [top  (get-top this)
                  top' (M/set-elem top coord team)]
-             (if (surrounded? top' coord)
-               false
-               (let [top' (do-captures top' coord team)]
-                 (not= top' top)))))))
+             (not (occupied? top coord))
+             (if-not (surrounded? top' coord)
+               true
+               (let [targets (->> (M/get-neighbors* top' coord)
+                                  (filter surrounded?))]
+                 (not (empty? targets))))))))
 
   (place [this coord]
     (when (can-place? this coord)
