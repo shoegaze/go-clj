@@ -62,8 +62,10 @@
           (= bottom top)))))
 
   (place [this coord]
-    (let [{history :history, dim :dim} this
-          top   (get-top this)
-          team' (next-team (get-team this))]
-      (when (can-place? top coord team')
-        (mat/set-elem top coord team')))))
+    (let [top  (get-top this)
+          team (get-team this)]
+      (when (can-place? top coord team)
+        (let [{dim :dim, history :history} this
+              top'     (M/set-elem top coord team)
+              history' (conj history top')]
+          (->Game dim history'))))))
