@@ -31,7 +31,8 @@
   (get-stone [this coord])
   (ended? [this])
   (can-place? [this coord])
-  (place [this coord]))
+  (place [this coord])
+  (pass [this]))
 
 (defrecord Game [dim history]
   IGame
@@ -78,4 +79,10 @@
         (let [{dim :dim, history :history} this
               top'     (M/set-elem top coord team)
               history' (conj history top')]
-          (->Game dim history'))))))
+          (->Game dim history')))))
+
+  (pass [this]
+    (let [{history :history} this
+          top      (get-top this)
+          history' (conj history top)]
+      (->Game dim history'))))
