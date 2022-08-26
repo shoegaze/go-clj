@@ -100,10 +100,12 @@
     (let [top  (get-top this)
           team (get-team this)]
       (when (can-place? this coord)
-        (let [top'     (M/set-elem top coord team)
-              top'     (capture top' coord team)
-              history' (conj history top')]
-          (->Game dim history')))))
+        (let [top'       (M/set-elem top coord team)
+              top'       (capture top' coord team)
+              [bottom _] (take-last 2 history)]
+          (when (not= top' bottom)                          ; Ko rule
+            (let [history' (conj history top')]
+              (->Game dim history')))))))
 
   (pass [this]
     (let [top      (get-top this)
