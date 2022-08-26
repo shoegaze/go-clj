@@ -4,7 +4,19 @@
             [client.row :refer (row-component)]))
 
 
-(defonce game (r/atom (->Game [9 9] [])))
+(defonce game (r/atom (->Game [4 5] [[[:empty :empty :empty :empty]
+                                      [:empty :empty :empty :empty]
+                                      [:empty :empty :empty :empty]
+                                      [:empty :empty :empty :empty]
+                                      [:empty :empty :empty :empty]]
+                                     
+                                     [[:empty :empty :empty :empty]
+                                      [:empty :empty :white :black]
+                                      [:empty :white :empty :white]
+                                      [:empty :empty :white :black]
+                                      [:empty :empty :empty :empty]]
+                                     ])))
+
 (defonce team (r/atom (get-team @game)))
 
 (defn grid-component []
