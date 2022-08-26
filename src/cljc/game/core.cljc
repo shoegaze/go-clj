@@ -63,32 +63,29 @@
 
 (defrecord Game [dim history]
   IGame
-  (get-top [this]
-    (let [{dim :dim} this]
+  (get-top [_this]
       (or (peek history)
-          (M/new-matrix dim :empty))))
+          (M/new-matrix dim :empty)))
 
-  (get-team [this]
-    (let [history (:history this)
-          turns   (count history)]
+  (get-team [_this]
+    (let [turns (count history)]
       (if (even? turns)
         :black
         :white)))
 
   (get-stone [this coord]
-    (M/get-elem (get-top this) coord :gray))
+    (let [top this]
+      (M/get-elem top coord :gray)))
 
-  (ended? [this]
-    (let [history (:history this)
-          turns   (count history)]
+  (ended? [_this]
+    (let [turns (count history)]
       (if (< turns 2)
         false
         (let [[bottom top] (take-last 2 history)]
           (= bottom top)))))
 
   (can-place? [this coord]
-    (let [{dim :dim} this
-          team (get-team this)]
+    (let [team (get-team this)]
       (and (in-bounds? dim coord)
            (let [top  (get-top this)
                  top' (M/set-elem top coord team)]
@@ -103,14 +100,12 @@
     (let [top  (get-top this)
           team (get-team this)]
       (when (can-place? this coord)
-        (let [{dim :dim, history :history} this
-              top'     (M/set-elem top coord team)
+        (let [top'     (M/set-elem top coord team)
               top'     (capture top' coord team)
               history' (conj history top')]
           (->Game dim history')))))
 
   (pass [this]
-    (let [{history :history} this
-          top      (get-top this)
+    (let [top      (get-top this)
           history' (conj history top)]
       (->Game dim history'))))
