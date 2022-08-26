@@ -74,7 +74,7 @@
         :white)))
 
   (get-stone [this coord]
-    (let [top this]
+    (let [top (get-top this)]
       (M/get-elem top coord :gray)))
 
   (ended? [_this]
