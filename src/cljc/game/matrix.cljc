@@ -1,4 +1,5 @@
-(ns game.matrix)
+(ns game.matrix
+  (:require [clojure.set :as set]))
 
 
 (defn- new-row [w default]
@@ -144,7 +145,7 @@
        path'
        (reduce
          (fn [path* [_ coord*]]
-           (clojure.set/union path* (connections* mat coord* path*)))
+           (set/union path* (connections* mat coord* path*)))
          path'
          neighbors*))))
   ([mat coord]
