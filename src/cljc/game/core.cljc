@@ -96,7 +96,7 @@
                   (if-not (surrounded? top' coord)
                     true
                     (let [targets (->> (M/get-neighbors* top' coord)
-                                       (filter surrounded?))]
+                                       (filter (fn [[_ c]] (surrounded? top' c))))]
                       (not (empty? targets)))))))))
 
   (place [this coord]
