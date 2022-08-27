@@ -22,10 +22,10 @@
          team       (M/get-elem mat coord)
          path'      (conj path coord)]
      (reduce
-       (fn [acc [s c]]
+       (fn [acc [t c]]
          (if (false? (unreduced acc))
            (reduced false)                                  ; Propagate (reduced false)
-           (condp = s
+           (condp = t
              :empty (reduced false)
              team   (surrounded? mat c path')
              true)))
